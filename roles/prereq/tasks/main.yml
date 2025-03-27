@@ -22,16 +22,33 @@
     mode: 0600
   when: k0s_use_custom_config
 
-- name: Generate default k0s config file
+- name: Generate k0s config file
   become: true
   block:
+
     - name: Create default k0s config
+      command: k0s default-config
       register: default_k0s_config
-      command: k0s default-config > {{ k0s_config_dir }}/k0s.yaml
-    - name: Store default k0f config
+      changed_when: false
+
+    - name: Parse default config as YAML
+      set_fact:
+        k0s_default_config_parsed: "{{ default_k0s_config.stdout | from_yaml }}"
+
+    - name: Merge default config with custom overrides
+      set_fact:
+        k0s_final_config: "{{ k0s_default_config_parsed | ansible.builtin.combine(k0s_custom_config, recursive=true) }}"
+      when: k0s_custom_config is defined
+
+    - name: Use default config if no custom overrides
+      set_fact:
+        k0s_final_config: "{{ k0s_default_config_parsed }}"
+      when: k0s_custom_config is not defined
+
+    - name: Write the final k0s config file
       copy:
         dest: "{{ k0s_config_dir }}/k0s.yaml"
-        content: "{{ default_k0s_config.stdout }}"
+        content: "{{ k0s_final_config | to_nice_yaml }}"
         owner: "{{ ansible_user }}"
         group: "{{ ansible_user }}"
         mode: 0600
