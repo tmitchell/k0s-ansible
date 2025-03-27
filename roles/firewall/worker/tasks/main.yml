@@ -1,0 +1,23 @@
+---
+
+- name: Ensure firewall ports are open for worker
+  firewalld:
+    zone: "{{ firewall_zone }}"
+    port: "{{ item }}"
+    permanent: yes
+    state: enabled
+  loop: "{{ firewall_common_ports + firewall_worker_ports }}"
+  become: true
+
+- name: Ensure firewall sources are allowed for worker
+  firewalld:
+    zone: "{{ firewall_zone }}"
+    source: "{{ item }}"
+    permanent: yes
+    state: enabled
+  loop: "{{ firewall_common_sources }}"
+  become: true
+
+- name: Reload firewall
+  ansible.builtin.command: firewall-cmd --reload
+  become: true

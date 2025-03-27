@@ -1,0 +1,11 @@
+firewall_zone: public
+firewall_common_sources:
+  - "10.244.0.0/16"  # podCIDR
+  - "10.96.0.0/12"   # serviceCIDR
+  - "192.168.0.0/24" # Node subnet
+firewall_common_ports:
+  - "10250/tcp"      # Kubelet
+  - "179/tcp"        # kube-router (BGP)
+  - "4789/udp"       # Calico VXLAN (optional)
+firewall_worker_ports:
+  - "8132/tcp"       # Konnectivity agent

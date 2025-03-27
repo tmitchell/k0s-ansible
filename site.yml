@@ -14,6 +14,8 @@
   become: yes
   name: Configure initial k0s control plane node
   roles:
+    - role: firewall/controller
+      tags: firewall
     - role: k0s/initial_controller
       tags: init
 
@@ -23,6 +25,8 @@
   serial: 1
   name: Configure k0s control plane nodes
   roles:
+    - role: firewall/controller
+      tags: firewall
     - role: k0s/controller
       tags: server
 
@@ -30,5 +34,7 @@
   become: yes
   name: Configure k0s worker nodes
   roles:
+    - role: firewall/worker
+      tags: firewall
     - role: k0s/worker
       tags: worker
